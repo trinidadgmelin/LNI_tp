@@ -8,8 +8,14 @@ let tiempoFinalizado = 0;
 const DURACION_JUEGO = 15;
 const DURACION_ESPERA = 3;
 
-// Sonidos sinteticos
-let oscTic, oscExito;
+// Audio
+let oscTic;
+let sonidoGanar;
+
+function preload() {
+  // Carga del archivo .mp3
+  sonidoGanar = loadSound('ganar.mp3');
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -22,9 +28,8 @@ function setup() {
   btnConectar.style('z-index', '10');
   btnConectar.mousePressed(conectarArduino);
 
-  // Sintetizadores de Audio
+  // Sintetizador solo para el Tic
   oscTic = new p5.Oscillator('sine');
-  oscExito = new p5.Oscillator('triangle');
 }
 
 function windowResized() {
@@ -125,11 +130,7 @@ function sonarTic() {
 }
 
 function sonarExito() {
-  if (getAudioContext().state === 'running') {
-    oscExito.freq(523.25);
-    oscExito.start();
-    oscExito.amp(0.4, 0.05);
-    oscExito.freq(659.25, 0.2);
-    oscExito.stop(0.5);
+  if (getAudioContext().state === 'running' && sonidoGanar.isLoaded()) {
+    sonidoGanar.play();
   }
 }
