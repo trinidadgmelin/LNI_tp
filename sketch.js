@@ -19,6 +19,8 @@ function setup() {
   // Boton para conectar Arduino via Web Serial Nativo
   let btnConectar = createButton('Conectar Arduino');
   btnConectar.position(10, 10);
+  btnConectar.style('padding', '10px');
+  btnConectar.style('z-index', '10');
   btnConectar.mousePressed(conectarArduino);
 
   // Sintetizadores de Audio
@@ -47,8 +49,12 @@ async function conectarArduino() {
 // Funcion auxiliar para enviar caracteres al Arduino
 async function enviarComando(letra) {
   if (writer) {
-    const data = new TextEncoder().encode(letra);
-    await writer.write(data);
+    try {
+      const data = new TextEncoder().encode(letra);
+      await writer.write(data);
+    } catch (e) {
+      console.error("Error enviando comando:", e);
+    }
   }
 }
 
@@ -65,13 +71,13 @@ function draw() {
 
     if (tiempoRestante > 0) {
       sonarTic();
-      enviarComando('T'); // Activa destello de 80ms del LED rojo
+      enviarComando('T'); // Activa destello del LED
     } else {
       jugando = false;
       terminoJuego = true;
       tiempoFinalizado = millis();
       sonarExito();
-      enviarComando('G'); // Envia orden de Victoria al Arduino (LED verde ON)
+      enviarComando('G'); // Envia orden de Victoria al Arduino
     }
   }
 
@@ -81,10 +87,12 @@ function draw() {
 }
 
 function touchStarted(event) {
-  if (event && event.target && event.target.tagName !== 'CANVAS') {
+  // Previene interacción si tocamos el botón de conectar
+  if (event && event.target && event.target.tagName === 'BUTTON') {
     return true;
   }
 
+  // Activa el contexto de audio si estaba suspendido por el navegador
   userStartAudio();
 
   if (!jugando && !terminoJuego) {
@@ -114,24 +122,30 @@ function reiniciarJuego() {
 
 // --- EFECTOS DE SONIDO ---
 function sonarTic() {
-  oscTic.freq(800);
-  oscTic.start();
-  oscTic.amp(0.3, 0.05);
-  oscTic.stop(0.1);
+  if (getAudioContext().state === 'running') {
+    oscTic.freq(800);
+    oscTic.start();
+    oscTic.amp(0.3, 0.05);
+    oscTic.stop(0.1);
+  }
 }
 
 function sonarExito() {
-  oscExito.freq(523.25);
-  oscExito.start();
-  oscExito.amp(0.4, 0.05);
-  oscExito.freq(659.25, 0.2);
-  oscExito.stop(0.5);
+  if (getAudioContext().state === 'running') {
+    oscExito.freq(523.25);
+    oscExito.start();
+    oscExito.amp(0.4, 0.05);
+    oscExito.freq(659.25, 0.2);
+    oscExito.stop(0.5);
+  }
 }
 
 function sonarFallo() {
-  oscFallo.freq(200);
-  oscFallo.start();
-  oscFallo.amp(0.4, 0.05);
-  oscFallo.freq(100, 0.3);
-  oscFallo.stop(0.4);
+  if (getAudioContext().state === 'running') {
+    oscFallo.freq(200);
+    oscFallo.start();
+    oscFallo.amp(0.4, 0.05);
+    oscFallo.freq(100, 0.3);
+    oscFallo.stop(0.4);
+  }
 }
