@@ -1,4 +1,3 @@
-let port;
 let writer;
 let jugando = false;
 let terminoJuego = false;
@@ -10,7 +9,7 @@ const DURACION_JUEGO = 15;
 const DURACION_ESPERA = 3;
 
 // Sonidos sinteticos
-let oscTic, oscExito, oscFallo;
+let oscTic, oscExito;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -26,7 +25,6 @@ function setup() {
   // Sintetizadores de Audio
   oscTic = new p5.Oscillator('sine');
   oscExito = new p5.Oscillator('triangle');
-  oscFallo = new p5.Oscillator('sawtooth');
 }
 
 function windowResized() {
@@ -37,7 +35,7 @@ function windowResized() {
 // Funcion nativa para abrir el puerto Serie
 async function conectarArduino() {
   try {
-    port = await navigator.serial.requestPort();
+    const port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
     writer = port.writable.getWriter();
     console.log("Arduino conectado con exito");
@@ -107,10 +105,6 @@ function touchStarted(event) {
   return false;
 }
 
-function touchEnded() {
-  return false;
-}
-
 function reiniciarJuego() {
   jugando = false;
   terminoJuego = false;
@@ -137,15 +131,5 @@ function sonarExito() {
     oscExito.amp(0.4, 0.05);
     oscExito.freq(659.25, 0.2);
     oscExito.stop(0.5);
-  }
-}
-
-function sonarFallo() {
-  if (getAudioContext().state === 'running') {
-    oscFallo.freq(200);
-    oscFallo.start();
-    oscFallo.amp(0.4, 0.05);
-    oscFallo.freq(100, 0.3);
-    oscFallo.stop(0.4);
   }
 }
