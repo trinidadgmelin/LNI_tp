@@ -1,3 +1,4 @@
+let port; // Debe ser global para no perder la conexión
 let writer;
 let jugando = false;
 let terminoJuego = false;
@@ -13,7 +14,6 @@ let oscTic;
 let sonidoGanar;
 
 function preload() {
-  // Carga del archivo .mp3
   sonidoGanar = loadSound('ganar.mp3');
 }
 
@@ -40,10 +40,10 @@ function windowResized() {
 // Funcion nativa para abrir el puerto Serie
 async function conectarArduino() {
   try {
-    const port = await navigator.serial.requestPort();
+    port = await navigator.serial.requestPort(); // Asigna a la variable global
     await port.open({ baudRate: 9600 });
     writer = port.writable.getWriter();
-    console.log("Arduino conectado con exito");
+    console.log("Arduino conectado con éxito");
   } catch (err) {
     console.error("Error al conectar Serie:", err);
   }
